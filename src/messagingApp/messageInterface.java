@@ -19,6 +19,7 @@ public class messageInterface extends JFrame {
 	private JPanel contentPane;
 	private JTextField textFieldIP;
 	private JTextField textFieldUser;
+	///hello
 
 	/**
 	 * Launch the application.
