@@ -9,7 +9,7 @@ import java.io.*;
 
 public class GreetingClient
 {
-	public void sendClient() {
+	public void sendClient(String JsonPacket) {
 	      //String serverName = args[0];								// Used for command line parameter
 	      //int port = Integer.parseInt(args[1]);						// Used for command line parameter
 	      

@@ -6,8 +6,13 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+
+import com.google.gson.Gson;
+
 import javax.swing.JTextField;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+
 import java.awt.Font;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
@@ -19,7 +24,15 @@ public class messageInterface extends JFrame {
 	private JPanel contentPane;
 	private JTextField textFieldIP;
 	private JTextField textFieldUser;
-	///hello
+	
+	private DataManagement DM = new DataManagement();
+	
+	private String UserIPString;
+	private String UserIDString;
+	
+	private InfoPacket infoPacket;
+	
+	private GreetingClient User = new GreetingClient();
 
 	/**
 	 * Launch the application.
@@ -84,7 +97,36 @@ public class messageInterface extends JFrame {
 		
 		JButton btnSend = new JButton("Send Message");
 		btnSend.addActionListener(new ActionListener() {
+			//=======================================================================
+			//|Method			:	CreateLines(String Command)					   			
+			//|																   		
+			//|Method parameters:	String Command								   		
+			//|																   		
+			//|What it does		:	Creates points in an array to be used for drawing
+			//|						
+			//|																	    
+			//|Change log		:	Date		Creator    	Notes			    
+			//|						===========	========   	=============	    
+			//|						Feb 3 2022	J. Shaddick	Initial setup
+			//|
+			//|						Feb 10 2022	J. Smith   	Added code to convert the infoPacket
+			//|												class object into a json string
+			//=======================================================================
 			public void actionPerformed(ActionEvent e) {
+				//Creates a new packet object
+				infoPacket = new InfoPacket();
+				
+				//Fills out the needed info for sending a Json packet
+				infoPacket.packetType = "message";
+				infoPacket.packetArguments = textPaneMessageInput.getText();
+				infoPacket.userID = UserIDString;
+				
+				//Converts the object into a string
+				String packetString_json = new Gson().toJson(infoPacket);
+				
+				//Calls method to send packet (now as a string) to the server through the client
+				User.sendClient(packetString_json);
+				
 			}
 		});
 		btnSend.setVisible(false);
@@ -118,32 +160,35 @@ public class messageInterface extends JFrame {
 		JButton btnSubmitUserInfo = new JButton("Submit");
 		btnSubmitUserInfo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String IPAddress = "";
-				String Username = "";
-				lblIP.setVisible(false);
-				lblUsername.setVisible(false);
-				IPAddress = textFieldIP.getText();
-				System.out.println(IPAddress);
-				Username = textFieldUser.getText();
-				System.out.println(Username);
-				textFieldIP.setVisible(false);
-				textFieldUser.setVisible(false);
-				btnSubmitUserInfo.setVisible(false);
-				textFieldIP.setEnabled(false);
-				textFieldUser.setEnabled(false);
-				btnSubmitUserInfo.setEnabled(false);
-				btnSend.setVisible(true);
-				btnSend.setEnabled(true);
-				textPaneMessageHistory.setEnabled(true);
-				lblMessageHistoryLabel.setEnabled(true);
-				lblUserList.setEnabled(true);
-				textPaneMessageInput.setEnabled(true);
-				textPaneUsersOnline.setEnabled(true);
-				textPaneMessageHistory.setVisible(true);
-				lblMessageHistoryLabel.setVisible(true);
-				lblUserList.setVisible(true);
-				textPaneMessageInput.setVisible(true);
-				textPaneUsersOnline.setVisible(true);
+				UserIPString = textFieldIP.getText();
+				UserIDString = textFieldUser.getText();
+				if(UserIDString.isBlank() || UserIPString.isBlank()) {
+					JOptionPane.showMessageDialog(null, "Error: Insufficient Data");
+				}
+				else {
+					DM.getUserInfo(UserIPString);
+					
+					lblIP.setVisible(false);
+					lblUsername.setVisible(false);
+					textFieldIP.setVisible(false);
+					textFieldUser.setVisible(false);
+					btnSubmitUserInfo.setVisible(false);
+					textFieldIP.setEnabled(false);
+					textFieldUser.setEnabled(false);
+					btnSubmitUserInfo.setEnabled(false);
+					btnSend.setVisible(true);
+					btnSend.setEnabled(true);
+					textPaneMessageHistory.setEnabled(true);
+					lblMessageHistoryLabel.setEnabled(true);
+					lblUserList.setEnabled(true);
+					textPaneMessageInput.setEnabled(true);
+					textPaneUsersOnline.setEnabled(true);
+					textPaneMessageHistory.setVisible(true);
+					lblMessageHistoryLabel.setVisible(true);
+					lblUserList.setVisible(true);
+					textPaneMessageInput.setVisible(true);
+					textPaneUsersOnline.setVisible(true);
+				}
 			}
 		});
 		btnSubmitUserInfo.setFont(new Font("Tahoma", Font.PLAIN, 40));
