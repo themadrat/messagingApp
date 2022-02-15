@@ -16,6 +16,8 @@ import javax.swing.JOptionPane;
 import java.awt.Font;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextPane;
 
@@ -24,8 +26,11 @@ public class messageInterface extends JFrame {
 	private JPanel contentPane;
 	private JTextField textFieldIP;
 	private JTextField textFieldUser;
+	private JLabel lblReturningQuestion;
+	private JButton btnLoadUser;
 	
 	private DataManagement DM = new DataManagement();
+	private MessageInstance messageInstance;
 	
 	private String UserIPString;
 	private String UserIDString;
@@ -111,14 +116,22 @@ public class messageInterface extends JFrame {
 			//|
 			//|						Feb 10 2022	J. Smith   	Added code to convert the infoPacket
 			//|												class object into a json string
+			
+			//|						Feb 15 2022	J. Smith   	Added code to implement message instance class
 			//=======================================================================
 			public void actionPerformed(ActionEvent e) {
 				//Creates a new packet object
 				infoPacket = new InfoPacket();
+				messageInstance = new MessageInstance();
+				
+				messageInstance.MessageContent = textPaneMessageInput.getText();
+				messageInstance.userID = UserIDString;
+				
+				String messageInstance2Json = new Gson().toJson(messageInstance);
 				
 				//Fills out the needed info for sending a Json packet
 				infoPacket.packetType = "message";
-				infoPacket.packetArguments = textPaneMessageInput.getText();
+				infoPacket.packetArguments = messageInstance2Json;
 				infoPacket.userID = UserIDString;
 				
 				//Converts the object into a string
@@ -126,7 +139,6 @@ public class messageInterface extends JFrame {
 				
 				//Calls method to send packet (now as a string) to the server through the client
 				User.sendClient(packetString_json);
-				
 			}
 		});
 		btnSend.setVisible(false);
@@ -160,13 +172,51 @@ public class messageInterface extends JFrame {
 		JButton btnSubmitUserInfo = new JButton("Submit");
 		btnSubmitUserInfo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				/*
+				 * Method:				actionPerformed
+				 * 
+				 * Method Parameters:	ActionEvent e
+				 * 
+				 * Method Return:		None
+				 * 
+				 * Synopsis:			This method will acquire the username and IP address
+				 * 						and will send it to the data packet. It will also use data
+				 * 						management class to save the info so the user will not
+				 * 						need to remember their IP or the username they provided.
+				 * 
+				 * Modifications:		Date:		Name:			Modifications:
+				 * 						02/08/2022	Jared Shaddick	Initial Setup
+				 * 						02/10/2022	Joey Smith		Adjusted Code for use for
+				 * 													info packets
+				 */
 				UserIPString = textFieldIP.getText();
 				UserIDString = textFieldUser.getText();
 				if(UserIDString.isBlank() || UserIPString.isBlank()) {
 					JOptionPane.showMessageDialog(null, "Error: Insufficient Data");
 				}
 				else {
-					DM.getUserInfo(UserIPString);
+					try {
+						DM.getUserInfo(UserIDString ,UserIPString);
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					
+					User.serverName = UserIPString;
+					
+					infoPacket = new InfoPacket();
+					
+					//Fills out the needed info for sending a Json packet
+					infoPacket.packetType = "username";
+					infoPacket.packetArguments = textFieldIP.getText();
+					infoPacket.userID = UserIDString;
+					
+					//Converts the object into a string
+					String packetString_json = new Gson().toJson(infoPacket);
+					
+					//Calls method to send packet (now as a string) to the server through the client
+					User.sendClient(packetString_json);
+					
 					
 					lblIP.setVisible(false);
 					lblUsername.setVisible(false);
@@ -188,12 +238,93 @@ public class messageInterface extends JFrame {
 					lblUserList.setVisible(true);
 					textPaneMessageInput.setVisible(true);
 					textPaneUsersOnline.setVisible(true);
+					btnLoadUser.setEnabled(false);
+					btnLoadUser.setVisible(false);
+					lblReturningQuestion.setVisible(false);
+					
 				}
 			}
 		});
 		btnSubmitUserInfo.setFont(new Font("Tahoma", Font.PLAIN, 40));
 		btnSubmitUserInfo.setBounds(287, 647, 240, 66);
 		contentPane.add(btnSubmitUserInfo);
+		
+		lblReturningQuestion = new JLabel("Returning User?");
+		lblReturningQuestion.setFont(new Font("Tahoma", Font.PLAIN, 30));
+		lblReturningQuestion.setBounds(537, 647, 214, 34);
+		contentPane.add(lblReturningQuestion);
+		
+		btnLoadUser = new JButton("Load Local User");
+		btnLoadUser.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				/*
+				 * Method:				actionPerformed
+				 * 
+				 * Method Parameters:	ActionEvent e
+				 * 
+				 * Method Return:		None
+				 * 
+				 * Synopsis:			This method will load user data from a file
+				 * 						if it exists so the user will not need to re-enter
+				 * 						the IP address and username every time the program starts.
+				 * 
+				 * Modifications:		Date:		Name:			Modifications:
+				 * 						02/15/2022	Jared Shaddick	Initial Setup
+				 * 						02/15/2022 	Jared Shaddick	Block Comments Established
+				 */
+				String[] userDataArray = new String[2];
+				try {
+					userDataArray = DM.loadUserInfo();
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				UserIPString = userDataArray[0];
+				UserIDString = userDataArray[1];
+				
+				User.serverName = UserIPString;
+				
+				infoPacket = new InfoPacket();
+				
+				//Fills out the needed info for sending a Json packet
+				infoPacket.packetType = "username";
+				infoPacket.packetArguments = textFieldIP.getText();
+				infoPacket.userID = UserIDString;
+				
+				//Converts the object into a string
+				String packetString_json = new Gson().toJson(infoPacket);
+				
+				//Calls method to send packet (now as a string) to the server through the client
+				User.sendClient(packetString_json);
+				
+				lblIP.setVisible(false);
+				lblUsername.setVisible(false);
+				textFieldIP.setVisible(false);
+				textFieldUser.setVisible(false);
+				btnSubmitUserInfo.setVisible(false);
+				textFieldIP.setEnabled(false);
+				textFieldUser.setEnabled(false);
+				btnSubmitUserInfo.setEnabled(false);
+				btnSend.setVisible(true);
+				btnSend.setEnabled(true);
+				textPaneMessageHistory.setEnabled(true);
+				lblMessageHistoryLabel.setEnabled(true);
+				lblUserList.setEnabled(true);
+				textPaneMessageInput.setEnabled(true);
+				textPaneUsersOnline.setEnabled(true);
+				textPaneMessageHistory.setVisible(true);
+				lblMessageHistoryLabel.setVisible(true);
+				lblUserList.setVisible(true);
+				textPaneMessageInput.setVisible(true);
+				textPaneUsersOnline.setVisible(true);
+				btnLoadUser.setEnabled(false);
+				btnLoadUser.setVisible(false);
+				lblReturningQuestion.setVisible(false);
+			}
+		});
+		btnLoadUser.setFont(new Font("Tahoma", Font.PLAIN, 26));
+		btnLoadUser.setBounds(537, 692, 214, 34);
+		contentPane.add(btnLoadUser);
 		
 	}
 }
