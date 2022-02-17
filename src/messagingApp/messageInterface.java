@@ -5,6 +5,7 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.StyledDocument;
@@ -26,6 +27,7 @@ import java.util.Date;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextPane;
 import javax.swing.JTextArea;
+import javax.swing.DropMode;
 
 public class messageInterface extends JFrame {
 
@@ -35,6 +37,7 @@ public class messageInterface extends JFrame {
 	private JLabel lblReturningQuestion;
 	private JButton btnLoadUser;
 	private JTextPane textPaneMessageHistory;
+	private JScrollPane jsp;
 	
 	public Date startTime = new Date();
 	
@@ -84,8 +87,11 @@ public class messageInterface extends JFrame {
 		textPaneMessageHistory = new JTextPane();
 		textPaneMessageHistory.setEnabled(false);
 		textPaneMessageHistory.setEditable(false);
-		textPaneMessageHistory.setBounds(10, 46, 451, 391);
-		contentPane.add(textPaneMessageHistory);
+		//textPaneMessageHistory.setBounds(10, 46, 451, 391);
+		jsp = new JScrollPane(textPaneMessageHistory);
+		jsp.setBounds(10, 46, 451, 391);
+		contentPane.add(jsp);
+		//contentPane.add(textPaneMessageHistory);
 		
 		JTextPane textPaneUsersOnline = new JTextPane();
 		textPaneUsersOnline.setEnabled(false);
@@ -325,15 +331,9 @@ public class messageInterface extends JFrame {
 		ArrayList<MessageInstance> inPacket = new ArrayList<MessageInstance>();
 		inPacket = converter.fromJson(packetFromServer, new TypeToken<ArrayList<MessageInstance>>() {}.getType());
 		System.out.println(inPacket.get(1).MessageContent);
-		int i = inPacket.size() - 1;
-		int b = inPacket.size() - 20;
-		if ( b < 0) {
-			b = 0;
-		}
-		for (; i > b; i--) {
-			
+		for (MessageInstance messageIn : inPacket) {
 			try {
-				appendString(inPacket.get(i).MessageContent, inPacket.get(i).userID );
+				appendString(messageIn.MessageContent, messageIn.userID );
 			} catch (BadLocationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
