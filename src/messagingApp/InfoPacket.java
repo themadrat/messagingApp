@@ -13,7 +13,7 @@ public class InfoPacket
 	
 	public String issues = ""; //if the server has any issues when handling something, it'll go here
 	
-	public Date creationTime;
+	public Long creationTime;
 	
 	/*PACKET TYPES -> SEND TO SERVER
 	 * "ping" - send a ping to the server at regular intervals to update the "active" status - does not send any information back
@@ -25,9 +25,8 @@ public class InfoPacket
 	
 	InfoPacket()
 	{
-		creationTime = new Date();
+		creationTime = new Date().getTime();
 		System.out.println(creationTime);
 	}
 	
 }
-

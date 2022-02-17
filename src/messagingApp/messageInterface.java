@@ -6,8 +6,11 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.StyledDocument;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import javax.swing.JTextField;
 import javax.swing.JLabel;
@@ -18,8 +21,11 @@ import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextPane;
+import javax.swing.JTextArea;
 
 public class messageInterface extends JFrame {
 
@@ -28,6 +34,9 @@ public class messageInterface extends JFrame {
 	private JTextField textFieldUser;
 	private JLabel lblReturningQuestion;
 	private JButton btnLoadUser;
+	private JTextPane textPaneMessageHistory;
+	
+	public Date startTime = new Date();
 	
 	private DataManagement DM = new DataManagement();
 	private MessageInstance messageInstance;
@@ -72,6 +81,12 @@ public class messageInterface extends JFrame {
 		textPaneMessageInput.setBounds(10, 519, 451, 117);
 		contentPane.add(textPaneMessageInput);
 		
+		textPaneMessageHistory = new JTextPane();
+		textPaneMessageHistory.setEnabled(false);
+		textPaneMessageHistory.setEditable(false);
+		textPaneMessageHistory.setBounds(10, 46, 451, 391);
+		contentPane.add(textPaneMessageHistory);
+		
 		JTextPane textPaneUsersOnline = new JTextPane();
 		textPaneUsersOnline.setEnabled(false);
 		textPaneUsersOnline.setEditable(false);
@@ -92,13 +107,6 @@ public class messageInterface extends JFrame {
 		lblUserList.setFont(new Font("Tahoma", Font.PLAIN, 20));
 		lblUserList.setBounds(471, 11, 141, 24);
 		contentPane.add(lblUserList);
-		
-		JTextPane textPaneMessageHistory = new JTextPane();
-		textPaneMessageHistory.setEnabled(false);
-		textPaneMessageHistory.setEditable(false);
-		textPaneMessageHistory.setVisible(false);
-		textPaneMessageHistory.setBounds(10, 46, 451, 391);
-		contentPane.add(textPaneMessageHistory);
 		
 		JButton btnSend = new JButton("Send Message");
 		btnSend.addActionListener(new ActionListener() {
@@ -139,6 +147,7 @@ public class messageInterface extends JFrame {
 				
 				//Calls method to send packet (now as a string) to the server through the client
 				User.sendClient(packetString_json);
+				updateMessages();
 			}
 		});
 		btnSend.setVisible(false);
@@ -203,20 +212,6 @@ public class messageInterface extends JFrame {
 					}
 					
 					User.serverName = UserIPString;
-					
-					infoPacket = new InfoPacket();
-					
-					//Fills out the needed info for sending a Json packet
-					infoPacket.packetType = "username";
-					infoPacket.packetArguments = textFieldIP.getText();
-					infoPacket.userID = UserIDString;
-					
-					//Converts the object into a string
-					String packetString_json = new Gson().toJson(infoPacket);
-					
-					//Calls method to send packet (now as a string) to the server through the client
-					User.sendClient(packetString_json);
-					
 					
 					lblIP.setVisible(false);
 					lblUsername.setVisible(false);
@@ -284,19 +279,6 @@ public class messageInterface extends JFrame {
 				
 				User.serverName = UserIPString;
 				
-				infoPacket = new InfoPacket();
-				
-				//Fills out the needed info for sending a Json packet
-				infoPacket.packetType = "username";
-				infoPacket.packetArguments = textFieldIP.getText();
-				infoPacket.userID = UserIDString;
-				
-				//Converts the object into a string
-				String packetString_json = new Gson().toJson(infoPacket);
-				
-				//Calls method to send packet (now as a string) to the server through the client
-				User.sendClient(packetString_json);
-				
 				lblIP.setVisible(false);
 				lblUsername.setVisible(false);
 				textFieldIP.setVisible(false);
@@ -326,5 +308,43 @@ public class messageInterface extends JFrame {
 		btnLoadUser.setBounds(537, 692, 214, 34);
 		contentPane.add(btnLoadUser);
 		
+	}
+	
+	public void updateMessages() {
+		textPaneMessageHistory.setText(null);
+		InfoPacket InfoPacket = new InfoPacket();
+		Gson converter = new Gson();
+		InfoPacket.packetType = "update";
+		InfoPacket.packetArguments = converter.toJson(startTime.getTime());
+		
+		//Converts the object into a string
+		String packetString_json = converter.toJson(InfoPacket);
+		
+		String packetFromServer = "";
+		packetFromServer = User.sendClient(packetString_json);
+		ArrayList<MessageInstance> inPacket = new ArrayList<MessageInstance>();
+		inPacket = converter.fromJson(packetFromServer, new TypeToken<ArrayList<MessageInstance>>() {}.getType());
+		System.out.println(inPacket.get(1).MessageContent);
+		int i = inPacket.size() - 1;
+		int b = inPacket.size() - 20;
+		if ( b < 0) {
+			b = 0;
+		}
+		for (; i > b; i--) {
+			
+			try {
+				appendString(inPacket.get(i).MessageContent, inPacket.get(i).userID );
+			} catch (BadLocationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public void appendString(String message, String user) throws BadLocationException
+	{
+		String messageInfo = user + ": " + message + "\n";
+	    StyledDocument document = (StyledDocument) textPaneMessageHistory.getDocument();
+	    document.insertString(document.getLength(), messageInfo, null);
 	}
 }

@@ -12,7 +12,7 @@ public class GreetingClient
 	public String serverName  = "localhost";
 	
 	private int port = 6066;											// Hard-code port for connection
-	public void sendClient(String JsonPacket) {
+	public String sendClient(String JsonPacket) {
 		/*
 		 * Method:				sendClient
 		 * 
@@ -49,11 +49,14 @@ public class GreetingClient
 	        InputStream inFromServer = client.getInputStream();
 	        DataInputStream in =
                         new DataInputStream(inFromServer);
-	        System.out.println("Server says " + in.readUTF());
+	        String serverIn = in.readUTF();
+	        System.out.println("Server says " + serverIn);
 	        client.close();
+	        return serverIn;
 	    }catch(IOException e)
 	    {
 	         e.printStackTrace();
 	    }
+		return null;
 	}
 }
