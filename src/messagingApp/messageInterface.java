@@ -26,10 +26,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextPane;
+import javax.swing.Timer;
 import javax.swing.JTextArea;
 import javax.swing.DropMode;
 
-public class messageInterface extends JFrame {
+public class messageInterface extends JFrame implements ActionListener {
 
 	private JPanel contentPane;
 	private JTextField textFieldIP;
@@ -50,6 +51,10 @@ public class messageInterface extends JFrame {
 	private InfoPacket infoPacket;
 	
 	private GreetingClient User = new GreetingClient();
+	
+	private int seconds = 1;
+	private final Integer FRAMETIME = seconds * 1000;// 1 second = 1000 for input
+	private Timer tickTok = new Timer(FRAMETIME,this);
 
 	/**
 	 * Launch the application.
@@ -245,6 +250,7 @@ public class messageInterface extends JFrame {
 					btnLoadUser.setVisible(false);
 					lblReturningQuestion.setVisible(false);
 					
+					tickTok.start(); //starts the timer
 				}
 			}
 		});
@@ -311,11 +317,14 @@ public class messageInterface extends JFrame {
 				btnLoadUser.setEnabled(false);
 				btnLoadUser.setVisible(false);
 				lblReturningQuestion.setVisible(false);
+				
+				tickTok.start(); //starts the timer
 			}
 		});
 		btnLoadUser.setFont(new Font("Tahoma", Font.PLAIN, 26));
 		btnLoadUser.setBounds(537, 692, 214, 34);
 		contentPane.add(btnLoadUser);
+		
 		
 	}
 	
@@ -349,5 +358,10 @@ public class messageInterface extends JFrame {
 		String messageInfo = user + ": " + message + "\n";
 	    StyledDocument document = (StyledDocument) textPaneMessageHistory.getDocument();
 	    document.insertString(document.getLength(), messageInfo, null);
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		//updateMessages();
 	}
 }
