@@ -37,7 +37,7 @@ public class messageInterface extends JFrame {
 	private JLabel lblReturningQuestion;
 	private JButton btnLoadUser;
 	private JTextPane textPaneMessageHistory;
-	private JScrollPane jsp;
+	private JScrollPane messageScrollBar;
 	
 	public Date startTime = new Date();
 	
@@ -88,9 +88,10 @@ public class messageInterface extends JFrame {
 		textPaneMessageHistory.setEnabled(false);
 		textPaneMessageHistory.setEditable(false);
 		//textPaneMessageHistory.setBounds(10, 46, 451, 391);
-		jsp = new JScrollPane(textPaneMessageHistory);
-		jsp.setBounds(10, 46, 451, 391);
-		contentPane.add(jsp);
+		messageScrollBar = new JScrollPane(textPaneMessageHistory);
+		messageScrollBar.setVisible(false);
+		messageScrollBar.setBounds(10, 46, 451, 391);
+		contentPane.add(messageScrollBar);
 		//contentPane.add(textPaneMessageHistory);
 		
 		JTextPane textPaneUsersOnline = new JTextPane();
@@ -235,6 +236,7 @@ public class messageInterface extends JFrame {
 					textPaneMessageInput.setEnabled(true);
 					textPaneUsersOnline.setEnabled(true);
 					textPaneMessageHistory.setVisible(true);
+					messageScrollBar.setVisible(true);
 					lblMessageHistoryLabel.setVisible(true);
 					lblUserList.setVisible(true);
 					textPaneMessageInput.setVisible(true);
@@ -296,6 +298,7 @@ public class messageInterface extends JFrame {
 				btnSend.setVisible(true);
 				btnSend.setEnabled(true);
 				textPaneMessageHistory.setEnabled(true);
+				messageScrollBar.setVisible(true);
 				lblMessageHistoryLabel.setEnabled(true);
 				lblUserList.setEnabled(true);
 				textPaneMessageInput.setEnabled(true);
