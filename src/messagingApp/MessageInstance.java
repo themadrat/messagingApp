@@ -3,12 +3,12 @@ package messagingApp;
 import java.util.Date;
 
 public class MessageInstance {
-	String userID;
-    String MessageContent;
-    Date TimeSent;
+	public String userID;
+    public String MessageContent;
+    public Long TimeSent;
 
     MessageInstance()
     {
-        TimeSent = new Date();
+        TimeSent = new Date().getTime();
     }
 }

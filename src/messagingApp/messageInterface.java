@@ -18,6 +18,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import java.awt.Font;
+import java.awt.Image;
+
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.io.FileNotFoundException;
@@ -28,7 +30,9 @@ import java.awt.event.ActionEvent;
 import javax.swing.JTextPane;
 import javax.swing.Timer;
 import javax.swing.JTextArea;
+import javax.imageio.ImageIO;
 import javax.swing.DropMode;
+import javax.swing.ImageIcon;
 
 public class messageInterface extends JFrame implements ActionListener {
 
@@ -41,6 +45,9 @@ public class messageInterface extends JFrame implements ActionListener {
 	private JScrollPane messageScrollBar;
 	
 	public Date startTime = new Date();
+	public long timeSinceSent = 0;
+	
+	private ArrayList<MessageInstance> messageHistory = new ArrayList<MessageInstance>();
 	
 	private DataManagement DM = new DataManagement();
 	private MessageInstance messageInstance;
@@ -84,9 +91,10 @@ public class messageInterface extends JFrame implements ActionListener {
 		contentPane.setLayout(null);
 		
 		JTextPane textPaneMessageInput = new JTextPane();
+		textPaneMessageInput.setFont(new Font("Tahoma", Font.PLAIN, 45));
 		textPaneMessageInput.setEnabled(false);
 		textPaneMessageInput.setVisible(false);
-		textPaneMessageInput.setBounds(10, 519, 451, 117);
+		textPaneMessageInput.setBounds(10, 515, 451, 75);
 		contentPane.add(textPaneMessageInput);
 		
 		textPaneMessageHistory = new JTextPane();
@@ -120,7 +128,7 @@ public class messageInterface extends JFrame implements ActionListener {
 		lblUserList.setBounds(471, 11, 141, 24);
 		contentPane.add(lblUserList);
 		
-		JButton btnSend = new JButton("Send Message");
+		JButton btnSend = new JButton("");
 		btnSend.addActionListener(new ActionListener() {
 			//=======================================================================
 			//|Method			:	CreateLines(String Command)					   			
@@ -164,8 +172,10 @@ public class messageInterface extends JFrame implements ActionListener {
 		});
 		btnSend.setVisible(false);
 		btnSend.setEnabled(false);
+		ImageIcon sendImage = new ImageIcon("AppData/Images/sendArrow.png");
+		btnSend.setIcon(sendImage);
 		btnSend.setFont(new Font("Tahoma", Font.PLAIN, 22));
-		btnSend.setBounds(10, 647, 188, 34);
+		btnSend.setBounds(471, 515, 75, 75);
 		contentPane.add(btnSend);
 		
 		textFieldIP = new JTextField();
@@ -333,7 +343,7 @@ public class messageInterface extends JFrame implements ActionListener {
 		InfoPacket InfoPacket = new InfoPacket();
 		Gson converter = new Gson();
 		InfoPacket.packetType = "update";
-		InfoPacket.packetArguments = converter.toJson(startTime.getTime());
+		InfoPacket.packetArguments = converter.toJson(timeSinceSent);
 		
 		//Converts the object into a string
 		String packetString_json = converter.toJson(InfoPacket);
@@ -342,8 +352,9 @@ public class messageInterface extends JFrame implements ActionListener {
 		packetFromServer = User.sendClient(packetString_json);
 		ArrayList<MessageInstance> inPacket = new ArrayList<MessageInstance>();
 		inPacket = converter.fromJson(packetFromServer, new TypeToken<ArrayList<MessageInstance>>() {}.getType());
-		System.out.println(inPacket.get(1).MessageContent);
-		for (MessageInstance messageIn : inPacket) {
+		messageHistory.addAll(inPacket);
+		//System.out.println(inPacket.get(1).MessageContent);
+		for (MessageInstance messageIn : messageHistory) {
 			try {
 				appendString(messageIn.MessageContent, messageIn.userID );
 			} catch (BadLocationException e) {
@@ -351,7 +362,11 @@ public class messageInterface extends JFrame implements ActionListener {
 				e.printStackTrace();
 			}
 		}
+		Date newTime = new Date();
+		timeSinceSent = newTime.getTime();
 	}
+	
+	
 	
 	public void appendString(String message, String user) throws BadLocationException
 	{
@@ -362,6 +377,6 @@ public class messageInterface extends JFrame implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		//updateMessages();
+		updateMessages();
 	}
 }
