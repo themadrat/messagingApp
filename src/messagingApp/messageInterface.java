@@ -43,6 +43,7 @@ public class messageInterface extends JFrame implements ActionListener {
 	private JButton btnLoadUser;
 	private JTextPane textPaneMessageHistory;
 	private JScrollPane messageScrollBar;
+	private JTextPane textPaneUsersOnline;
 	
 	public Date startTime = new Date();
 	public long timeSinceSent = 0;
@@ -107,7 +108,7 @@ public class messageInterface extends JFrame implements ActionListener {
 		contentPane.add(messageScrollBar);
 		//contentPane.add(textPaneMessageHistory);
 		
-		JTextPane textPaneUsersOnline = new JTextPane();
+		textPaneUsersOnline = new JTextPane();
 		textPaneUsersOnline.setEnabled(false);
 		textPaneUsersOnline.setEditable(false);
 		textPaneUsersOnline.setVisible(false);
@@ -167,7 +168,12 @@ public class messageInterface extends JFrame implements ActionListener {
 				
 				//Calls method to send packet (now as a string) to the server through the client
 				User.sendClient(packetString_json);
-				updateMessages();
+				try {
+					updateMessages();
+				} catch (BadLocationException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 		});
 		btnSend.setVisible(false);
@@ -338,7 +344,12 @@ public class messageInterface extends JFrame implements ActionListener {
 		
 	}
 	
-	public void updateMessages() {
+	public void updateMessages() throws BadLocationException {
+		/*
+		 * Method:				updateMessages()
+		 * 
+		 * Method Parameters:	
+		 */
 		textPaneMessageHistory.setText(null);
 		InfoPacket InfoPacket = new InfoPacket();
 		Gson converter = new Gson();
@@ -355,18 +366,52 @@ public class messageInterface extends JFrame implements ActionListener {
 		messageHistory.addAll(inPacket);
 		//System.out.println(inPacket.get(1).MessageContent);
 		for (MessageInstance messageIn : messageHistory) {
-			try {
+			
 				appendString(messageIn.MessageContent, messageIn.userID );
-			} catch (BadLocationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 		}
 		Date newTime = new Date();
 		timeSinceSent = newTime.getTime();
 	}
 	
-	
+	public void updateUserListings() throws BadLocationException
+    {
+        //=======================================================================
+        //|Method            :    updateUserListings(String user)
+        //|
+        //|Method parameters:    String user
+        //|
+        //|What it does        :
+        //|
+        //|
+        //|Change log        :    Date        Creator        Notes
+        //|                        ===========    ========       =============
+        //|                        Feb 23 2022    J. Smith    Initial setup
+        //=======================================================================
+        textPaneUsersOnline.setText(null);
+        InfoPacket InfoPacket = new InfoPacket();
+        Gson converter = new Gson();
+        InfoPacket.packetType = "users";
+        InfoPacket.packetArguments = converter.toJson(startTime.getTime());
+
+        //Converts the object into a string
+        String packetString_json = converter.toJson(InfoPacket);
+
+        String packetFromServer = "";
+        packetFromServer = User.sendClient(packetString_json);
+
+        ArrayList<String> UsersOnline = new ArrayList<String>();
+        UsersOnline = converter.fromJson(packetFromServer, new TypeToken<ArrayList<String>>() {}.getType());
+        //For auto loop
+        for (String User: UsersOnline) {
+            StyledDocument document = (StyledDocument) textPaneUsersOnline.getDocument();
+            try {
+				document.insertString(document.getLength(), User + "\n", null);
+			} catch (BadLocationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        }
+    }
 	
 	public void appendString(String message, String user) throws BadLocationException
 	{
@@ -377,6 +422,12 @@ public class messageInterface extends JFrame implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		updateMessages();
+		try {
+			updateMessages();
+			updateUserListings();
+		} catch (BadLocationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 	}
 }
