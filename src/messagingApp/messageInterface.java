@@ -348,26 +348,36 @@ public class messageInterface extends JFrame implements ActionListener {
 		/*
 		 * Method:				updateMessages()
 		 * 
-		 * Method Parameters:	
+		 * Method Parameters:	None
+		 * 
+		 * Method Return:		Void
+		 * 
+		 * Synopsis:			Method responsible for getting the message history
+		 * 						from the server
+		 * 
+		 * Modifications:		Date:		Name:			Modifications:
+		 * 						02/17/2022	Jared Shaddick	Initial Setup
+		 * 						02/23/2022	Jared Shaddick	Added ArrayList for Storage
+		 * 													of Older Messages
 		 */
-		textPaneMessageHistory.setText(null);
+		textPaneMessageHistory.setText(null);																		//resets the textPane
 		InfoPacket InfoPacket = new InfoPacket();
-		Gson converter = new Gson();
-		InfoPacket.packetType = "update";
-		InfoPacket.packetArguments = converter.toJson(timeSinceSent);
+		Gson converter = new Gson();																				//new GSON instance
+		InfoPacket.packetType = "update";																			//needed info for JSON
+		InfoPacket.packetArguments = converter.toJson(timeSinceSent);												//converts info for use in JSON
 		
 		//Converts the object into a string
 		String packetString_json = converter.toJson(InfoPacket);
 		
 		String packetFromServer = "";
 		packetFromServer = User.sendClient(packetString_json);
-		ArrayList<MessageInstance> inPacket = new ArrayList<MessageInstance>();
+		ArrayList<MessageInstance> inPacket = new ArrayList<MessageInstance>();										//arraylist of MessageInstance created and instantiated
 		inPacket = converter.fromJson(packetFromServer, new TypeToken<ArrayList<MessageInstance>>() {}.getType());
-		messageHistory.addAll(inPacket);
+		messageHistory.addAll(inPacket);																			//adds all messages from inpacket to the arraylist
 		//System.out.println(inPacket.get(1).MessageContent);
 		for (MessageInstance messageIn : messageHistory) {
 			
-				appendString(messageIn.MessageContent, messageIn.userID );
+				appendString(messageIn.MessageContent, messageIn.userID );											//uses append string to add to the textPane for message history
 		}
 		Date newTime = new Date();
 		timeSinceSent = newTime.getTime();
@@ -415,9 +425,9 @@ public class messageInterface extends JFrame implements ActionListener {
 	
 	public void appendString(String message, String user) throws BadLocationException
 	{
-		String messageInfo = user + ": " + message + "\n";
-	    StyledDocument document = (StyledDocument) textPaneMessageHistory.getDocument();
-	    document.insertString(document.getLength(), messageInfo, null);
+		String messageInfo = user + ": " + message + "\n";										//uses the parameters to create a messageto be added to the textpane
+	    StyledDocument document = (StyledDocument) textPaneMessageHistory.getDocument();		//document variable created and instantiated
+	    document.insertString(document.getLength(), messageInfo, null);							//uses the dcoument variable to add content to the message history textpane
 	}
 
 	@Override

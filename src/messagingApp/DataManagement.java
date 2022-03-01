@@ -10,8 +10,8 @@ import java.util.Scanner;
 
 public class DataManagement {
 
-	private final static String dataDirectory = "data/userData.txt";
-	private Scanner fileScanner;
+	private final static String dataDirectory = "data/userData.txt";				//Default directory for storing user data
+	private Scanner fileScanner;													//Used for reading files
 	private String userID = "";
 	private String userIP = "";
 	
@@ -34,15 +34,15 @@ public class DataManagement {
 		boolean timeToSave = false;
 		userID = username;
 		userIP = IP;
-		File userDataFile = new File(dataDirectory);
+		File userDataFile = new File(dataDirectory);								//New file variable used to check if a file exists already
 		if(userDataFile.exists()) {
-			timeToSave = contentCheck(userDataFile);
+			timeToSave = contentCheck(userDataFile);								//Used to check if the file contents are different than the provided strings
 			if (!timeToSave) {
-				saveUserData();
+				saveUserData();														//Calls the method used for saving data
 			}
 		}
 		else {
-			saveUserData();
+			saveUserData();															//Calls the method used for saving data
 		}
 		
 		
@@ -64,17 +64,17 @@ public class DataManagement {
 		 * 						02/15/2022	Jared Shaddick	Initial Setup
 		 * 						02/15/2022 	Jared Shaddick	Block Comments Established
 		 */
-		boolean contentIdentical = false;
+		boolean contentIdentical = false;											//Boolean variable used for checking if the strings match the file contents
 		String userCheck = "";
 		String IPCheck = "";
 		try {
-			fileScanner = new Scanner(dataFile);
+			fileScanner = new Scanner(dataFile);									//Scanner instantiated
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		IPCheck = fileScanner.nextLine();
-		userCheck = fileScanner.nextLine();
+		IPCheck = fileScanner.nextLine();											//checks if the IP address matches
+		userCheck = fileScanner.nextLine();											//checks if the username matches
 		if (userCheck.matches(userID) && IPCheck.matches(userIP)) {
 			contentIdentical = true;
 		}
@@ -82,7 +82,7 @@ public class DataManagement {
 			contentIdentical = false;
 		}
 		
-		return contentIdentical;
+		return contentIdentical;													//returns the boolean variable
 	}
 	
 	private void saveUserData() throws IOException {
@@ -101,17 +101,17 @@ public class DataManagement {
 		 * 						02/08/2022	Jared Shaddick	Initial Setup
 		 */
 		int lineCounter = 0;
-		File userDataFile = new File(dataDirectory);
-		FileWriter saveUserData = new FileWriter(userDataFile);
+		File userDataFile = new File(dataDirectory);								//file variable created and instantiated
+		FileWriter saveUserData = new FileWriter(userDataFile);						//file writer variable created and instantiated
 		if (lineCounter == 0) {
-			saveUserData.write(userIP + "\n");
+			saveUserData.write(userIP + "\n");										//uses file writer to write data to the file
 			lineCounter++;
 		}
 		if (lineCounter == 1) {
-			saveUserData.write(userID + "\n");
+			saveUserData.write(userID + "\n");										//uses file writer to write data to the file
 			lineCounter++;
 		}
-		saveUserData.close();
+		saveUserData.close();														//closes the file writer
 	}
 	
 	public String[] loadUserInfo() throws FileNotFoundException {
@@ -129,11 +129,11 @@ public class DataManagement {
 		 * 						02/15/2022	Jared Shaddick	Initial Setup
 		 * 						02/15/2022 	Jared Shaddick	Block Comments Established
 		 */
-		String[] userInfo = new String[2];
-		File userDataFile = new File(dataDirectory);
-		fileScanner = new Scanner(userDataFile);
-		userInfo[0] = fileScanner.nextLine();
-		userInfo[1] = fileScanner.nextLine();
-		return userInfo;
+		String[] userInfo = new String[2];											//string array used for storing IP and username
+		File userDataFile = new File(dataDirectory);								//file variable created and instantiated
+		fileScanner = new Scanner(userDataFile);									//scanner instantiated
+		userInfo[0] = fileScanner.nextLine();										//assigns the IP to the array
+		userInfo[1] = fileScanner.nextLine();										//assigns the username to the array
+		return userInfo;															//returns the array
 	}
 }

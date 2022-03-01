@@ -4,6 +4,7 @@ import java.util.Date;
 
 public class InfoPacket
 {
+	//generic holder class that contains info to send to server
 	
 	public String packetType = "";
 	
@@ -25,8 +26,9 @@ public class InfoPacket
 	
 	InfoPacket()
 	{
+		//constructor
 		creationTime = new Date().getTime();
-		System.out.println(creationTime);
+		//System.out.println(creationTime);
 	}
 	
 }

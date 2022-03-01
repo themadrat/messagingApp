@@ -36,11 +36,11 @@ public class GreetingClient
 			
 		try
 	    {
-			System.out.println("Connecting to " + serverName
-	                            + " on port " + port);
+			//System.out.println("Connecting to " + serverName
+	        //                    + " on port " + port);
 	        Socket client = new Socket(serverName, port);
-	        System.out.println("Just connected to "
-	                     + client.getRemoteSocketAddress());
+	        //System.out.println("Just connected to "
+	        //             + client.getRemoteSocketAddress());
 	        OutputStream outToServer = client.getOutputStream();
 	        DataOutputStream out =
 	                      new DataOutputStream(outToServer);
@@ -50,8 +50,8 @@ public class GreetingClient
 	        DataInputStream in =
                         new DataInputStream(inFromServer);
 	        String serverIn = in.readUTF();
-	        System.out.println("Server says " + serverIn);
-	        client.close();
+	        //System.out.println("Server says " + serverIn);
+	        client.close(); //closes client
 	        return serverIn;
 	    }catch(IOException e)
 	    {
